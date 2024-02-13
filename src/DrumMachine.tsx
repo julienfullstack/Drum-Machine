@@ -72,8 +72,16 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
     setFilterFreq(newFreq);
   };
 
+  const filterRef = React.useRef(null);
+
   React.useEffect(() => {
+    
     const filter = new Tone.Filter(filterFreq, 'lowpass').toDestination();
+
+    filterRef.current = new Tone.Filter({
+      frequency: filterFreq,
+      type: 'lowpass'
+    }).toDestination();
 
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -83,6 +91,8 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
         },
       }).connect(filter),
     }));
+
+    filterRef.current?.connect(recorder);
 
     seqRef.current = new Tone.Sequence(
       (time, step) => {
@@ -97,7 +107,7 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
       "16n"
     );
     seqRef.current.start(0);
-  }, [samples, numOfSteps, filterFreq]);
+  }, [samples, numOfSteps, filterFreq, recorder]);
 
   React.useEffect(() => {
     return () => {
@@ -167,6 +177,14 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
         <button onClick={handleStartClick} className={styles.button}>
           {isPlaying ? "Pause" : "Start"}
         </button>
+        <button onClick={handleRecordClick} className={styles.button}>
+        {recorder.state === 'started' ? 'Stop Recording' : 'Start Recording'}
+        </button>
+        {audioURL && (
+        <button onClick={handleDownloadClick} className={styles.button}>
+          Download Recorded Audio
+        </button>
+        )}
         <label className={styles.fader}>
           <span>BPM</span>
           <input
@@ -200,14 +218,7 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
             defaultValue={filterFreq}
           />
         </label>
-        <button onClick={handleRecordClick} className={styles.button}>
-        {recorder.state === 'started' ? 'Stop Recording' : 'Start Recording'}
-        </button>
-        {audioURL && (
-        <button onClick={handleDownloadClick} className={styles.button}>
-          Download Recorded Audio
-        </button>
-)}
+  
         
       </div>
     </div>
