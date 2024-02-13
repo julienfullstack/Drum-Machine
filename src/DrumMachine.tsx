@@ -12,10 +12,14 @@ type Track = {
 
 type Props = {
   samples: { url: string; name: string }[];
+  samples2: { url: string; name: string }[];
   numOfSteps?: number;
 };
 
-export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
+export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Props) {
+
+  const [currentSampleSet, setCurrentSampleSet] = React.useState(samples);
+
   const [recorder] = React.useState(new Tone.Recorder());
   const [audioURL, setAudioURL] = React.useState(''); 
 
@@ -72,16 +76,14 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
     setFilterFreq(newFreq);
   };
 
-  const filterRef = React.useRef(null);
+  const handleSampleChangeClick = () => {
+    setCurrentSampleSet(samples2);
+  };
+
 
   React.useEffect(() => {
     
     const filter = new Tone.Filter(filterFreq, 'lowpass').toDestination();
-
-    filterRef.current = new Tone.Filter({
-      frequency: filterFreq,
-      type: 'lowpass'
-    }).toDestination();
 
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -91,8 +93,6 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
         },
       }).connect(filter),
     }));
-
-    filterRef.current?.connect(recorder);
 
     seqRef.current = new Tone.Sequence(
       (time, step) => {
@@ -173,6 +173,9 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
           ))}
         </div>
       </div>
+      <button onClick={handleSampleChangeClick} className={styles.button}>
+      Change Samples
+    </button>
       <div className={styles.controls}>
         <button onClick={handleStartClick} className={styles.button}>
           {isPlaying ? "Pause" : "Start"}

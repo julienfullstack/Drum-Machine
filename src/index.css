@@ -13,4 +13,6 @@ body {
   display: grid;
   place-content: center;
   min-height: 100vh;
+  background-color: black;
+  color: white;
 }
