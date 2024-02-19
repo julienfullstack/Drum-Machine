@@ -19,6 +19,7 @@ type Props = {
 export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Props) {
   const [recorder] = React.useState(new Tone.Recorder());
   const [audioURL, setAudioURL] = React.useState(''); 
+  const [bpm, setBpm] = React.useState(Tone.Transport.bpm.value);
 
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [filterType, setFilterType] = React.useState<'lowpass' | 'highpass'>('lowpass');
@@ -67,7 +68,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   };
   
   const handleBpmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    Tone.Transport.bpm.value = Number(e.target.value);
+    const newBpm = Number(e.target.value);
+    setBpm(newBpm); // Update the bpm state variable
+    Tone.Transport.bpm.value = newBpm;
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +97,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     }
   };
 
-  // const envelopeRef = React.useRef<Tone.Envelope | null>(null);
   
   React.useEffect(() => {
     distortionRef.current = new Tone.Distortion(distortionValue).toDestination();
@@ -231,7 +233,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         </button>
         )}
         <label className={styles.fader}>
-          <span>BPM</span>
+          <span>BPM: {bpm}</span>
           <input
             type="range"
             min={30}
@@ -252,7 +254,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
             defaultValue={1}
           />
         </label>
-        <button onClick={() => setFilterType(prevType => prevType === 'lowpass' ? 'highpass' : 'lowpass')}>
+        <button onClick={() => setFilterType(prevType => prevType === 'lowpass' ? 'highpass' : 'lowpass')}className={styles.button} >
         Switch to {filterType === 'lowpass' ? 'Highpass' : 'Lowpass'}
       </button>
         <label className={styles.fader}>
