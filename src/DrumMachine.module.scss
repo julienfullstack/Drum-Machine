@@ -51,7 +51,7 @@ $rowGap: 8px;
     @include invisibleInput;
 
     &:checked + #{$lamp}__content {
-      background-color: #ff5b06;
+      background-color: #1f06ff;
     }
   }
 

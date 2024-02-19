@@ -17,20 +17,20 @@ type Props = {
 };
 
 export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Props) {
-
-  const [currentSampleSet, setCurrentSampleSet] = React.useState(samples);
-
   const [recorder] = React.useState(new Tone.Recorder());
   const [audioURL, setAudioURL] = React.useState(''); 
 
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [filterFreq, setFilterFreq] = React.useState(1000);
+  const [attack, setAttack] = React.useState(0.01);
+  const [distortionValue, setDistortionValue] = React.useState(0.8);
+
 
   const tracksRef = React.useRef<Track[]>([]);
   const stepsRef = React.useRef<HTMLInputElement[][]>([[]]);
   const lampsRef = React.useRef<HTMLInputElement[]>([]);
   const seqRef = React.useRef<Tone.Sequence | null>(null);
-
+  const distortionRef = React.useRef<Tone.Distortion | null>(null);
   const trackIds = [...Array(samples.length).keys()] as const;
   const stepIds = [...Array(numOfSteps).keys()] as const;
 
@@ -80,11 +80,37 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     setCurrentSampleSet(samples2);
   };
 
+  const handleDistortionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newDistortionValue = parseFloat(event.target.value);
+    setDistortionValue(newDistortionValue);
+    if (distortionRef.current) {
+      distortionRef.current.distortion = newDistortionValue;
+    }
+  };
 
+  // const envelopeRef = React.useRef<Tone.Envelope | null>(null);
+  
   React.useEffect(() => {
+    distortionRef.current = new Tone.Distortion(distortionValue).toDestination();
+  
+    const filter = new Tone.Filter({
+      frequency: filterFreq,
+      type: 'lowpass',
+      rolloff: -12, 
+      Q: 5, 
+    }).connect(distortionRef.current); // Connect the filter to the distortion
+  
+    tracksRef.current = samples.map((sample, i) => ({
+      id: i,
+      sampler: new Tone.Sampler({
+        urls: {
+          [NOTE]: sample.url,
+        },
+      }).connect(filter), // Connect the sampler to the filter
+    }));
+  
     
-    const filter = new Tone.Filter(filterFreq, 'lowpass').toDestination();
-
+  
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
       sampler: new Tone.Sampler({
@@ -93,7 +119,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         },
       }).connect(filter),
     }));
-
+  
     seqRef.current = new Tone.Sequence(
       (time, step) => {
         tracksRef.current.map((trk) => {
@@ -107,17 +133,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       "16n"
     );
     seqRef.current.start(0);
-  }, [samples, numOfSteps, filterFreq, recorder]);
-
-  React.useEffect(() => {
-    return () => {
-      seqRef.current?.dispose();
-      tracksRef.current.map((trk) => {
-        trk.sampler.disconnect();
-      });
-    };
-  }, []);
-
+  }, [samples, numOfSteps, filterFreq, recorder, distortionValue]);
 
   return (
     <div className={styles.machine}>
@@ -221,8 +237,17 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
             defaultValue={filterFreq}
           />
         </label>
-  
-        
+        <label className={styles.fader}>
+        <span>Distortion</span>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={distortionValue}
+          onChange={handleDistortionChange}
+        />
+      </label>
       </div>
     </div>
   );
