@@ -22,6 +22,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
 
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [filterFreq, setFilterFreq] = React.useState(1000);
+  const filterRef = React.useRef<Tone.Filter | null>(null);
   const [attack, setAttack] = React.useState(0.01);
   const [distortionValue, setDistortionValue] = React.useState(0.8);
 
@@ -33,6 +34,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   const distortionRef = React.useRef<Tone.Distortion | null>(null);
   const trackIds = [...Array(samples.length).keys()] as const;
   const stepIds = [...Array(numOfSteps).keys()] as const;
+
 
   const handleStartClick = async () => {
     if (Tone.Transport.state === "started") {
@@ -92,13 +94,17 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   
   React.useEffect(() => {
     distortionRef.current = new Tone.Distortion(distortionValue).toDestination();
+
+    if (filterRef.current) {
+      filterRef.current.disconnect();
+    }
   
     const filter = new Tone.Filter({
       frequency: filterFreq,
       type: 'lowpass',
       rolloff: -12, 
-      Q: 5, 
-    }).connect(distortionRef.current); // Connect the filter to the distortion
+      Q: 12, 
+    }).connect(distortionRef.current);
   
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -108,7 +114,8 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         },
       }).connect(filter), // Connect the sampler to the filter
     }));
-  
+
+    
     
   
     tracksRef.current = samples.map((sample, i) => ({
@@ -119,6 +126,8 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         },
       }).connect(filter),
     }));
+
+    
   
     seqRef.current = new Tone.Sequence(
       (time, step) => {
@@ -135,6 +144,8 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     seqRef.current.start(0);
   }, [samples, numOfSteps, filterFreq, recorder, distortionValue]);
 
+  
+   
   return (
     <div className={styles.machine}>
       <div className={styles.labelList}>
@@ -251,4 +262,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       </div>
     </div>
   );
+  
+
+  
 }
