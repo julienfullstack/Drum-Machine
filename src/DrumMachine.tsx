@@ -32,6 +32,8 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   const filterRef = React.useRef<Tone.Filter | null>(null);
   const [attack, setAttack] = React.useState(0.01);
   const [distortionValue, setDistortionValue] = React.useState(0.8);
+  const [phaserFreq, setPhaserFreq] = useState(0.5);
+  const phaserRef = useRef<Tone.Phaser | null>(null);
 
 
   const tracksRef = React.useRef<Track[]>([]);
@@ -120,6 +122,13 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     }).connect(distortionRef.current);
 
       filterRef.current = filter;
+
+      const phaser = new Tone.Phaser({
+        frequency: phaserFreq,
+        octaves: 5,
+        baseFrequency: 1000
+      }).toDestination();
+      phaserRef.current = phaser;
   
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -130,8 +139,15 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       }).connect(filter), 
     }));
 
-    
-  
+    tracksRef.current = samples.map((sample, i) => ({
+      id: i,
+      sampler: new Tone.Sampler({
+        urls: {
+          [NOTE]: sample.url,
+        },
+      }).connect(reverb), 
+    }));
+
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
       sampler: new Tone.Sampler({
@@ -141,6 +157,14 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       }).connect(filter),
     }));
 
+    tracksRef.current = samples.map((sample, i) => ({
+      id: i,
+      sampler: new Tone.Sampler({
+        urls: {
+          [NOTE]: sample.url,
+        },
+      }).connect(phaser),
+    }));
     
   
     seqRef.current = new Tone.Sequence(
@@ -156,7 +180,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       "16n"
     );
     seqRef.current.start(0);
-  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue, decay, wet]);
+  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue, decay, wet, phaserFreq]);
 
   
    
@@ -306,6 +330,23 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
           setWet(newWet);
           if (reverbRef.current) {
             reverbRef.current.wet.value = newWet;
+          }
+        }}
+      />
+    </label>
+    <label>
+      <span>Phaser Frequency</span>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={0.01}
+        value={phaserFreq}
+        onChange={(e) => {
+          const newPhaserFreq = Number(e.target.value);
+          setPhaserFreq(newPhaserFreq);
+          if (phaserRef.current) {
+            phaserRef.current.frequency.value = newPhaserFreq;
           }
         }}
       />
