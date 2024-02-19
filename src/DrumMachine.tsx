@@ -189,10 +189,10 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
           ))}
         </div>
       </div>
-      <button onClick={handleSampleChangeClick} className={styles.button}>
-      Change Samples
-    </button>
       <div className={styles.controls}>
+        <button onClick={handleSampleChangeClick} className={styles.button}>
+        Change Samples
+      </button>
         <button onClick={handleStartClick} className={styles.button}>
           {isPlaying ? "Pause" : "Start"}
         </button>

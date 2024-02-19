@@ -19,10 +19,11 @@ $rowGap: 8px;
 }
 
 .machine {
-  display: grid;
+  display: flex;
   grid-template-columns: auto 1fr;
   column-gap: 8px;
   row-gap: 16px;
+  flex-direction: row;
 }
 
 .labelList {
@@ -42,6 +43,12 @@ $rowGap: 8px;
   display: flex;
   flex-direction: column;
   row-gap: $rowGap;
+  flex-grow: 1;
+}
+
+.machine {
+  display: flex;
+  flex-direction: row;
 }
 
 .lamp {
@@ -115,6 +122,8 @@ $rowGap: 8px;
   align-items: center;
   column-gap: 16px;
   grid-column: 2;
+  flex-direction: column;
+  row-gap: 16px;
 }
 
 .button {
