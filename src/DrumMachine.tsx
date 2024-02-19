@@ -1,5 +1,7 @@
 import React from "react";
 import * as Tone from "tone";
+import { useEffect, useState, useRef } from 'react';
+
 
 import styles from "./DrumMachine.module.scss";
 
@@ -20,6 +22,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   const [recorder] = React.useState(new Tone.Recorder());
   const [audioURL, setAudioURL] = React.useState(''); 
   const [bpm, setBpm] = React.useState(Tone.Transport.bpm.value);
+  const [decay, setDecay] = useState(0.5);
+  const [wet, setWet] = useState(0.5);
+  const reverbRef = useRef<Tone.Reverb | null>(null);
   
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [filterType, setFilterType] = React.useState<'lowpass' | 'highpass'>('lowpass');
@@ -100,6 +105,8 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   
   React.useEffect(() => {
     distortionRef.current = new Tone.Distortion(distortionValue).toDestination();
+    const reverb = new Tone.Reverb({ decay, wet}).toDestination();
+    reverbRef.current = reverb;
 
     if (filterRef.current) {
       filterRef.current.disconnect();
@@ -123,6 +130,19 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       }).connect(filter), 
     }));
 
+    
+  
+    tracksRef.current = samples.map((sample, i) => ({
+      id: i,
+      sampler: new Tone.Sampler({
+        urls: {
+          [NOTE]: sample.url,
+        },
+      }).connect(filter),
+    }));
+
+    
+  
     seqRef.current = new Tone.Sequence(
       (time, step) => {
         tracksRef.current.map((trk) => {
@@ -136,7 +156,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       "16n"
     );
     seqRef.current.start(0);
-  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue]);
+  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue, decay, wet]);
 
   
    
@@ -195,9 +215,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         </div>
       </div>
       <div className={styles.controls}>
-        <button onClick={handleSampleChangeClick} className={styles.button}>
+        {/* <button onClick={handleSampleChangeClick} className={styles.button}>
         Change Samples
-      </button>
+      </button> */}
         <button onClick={handleStartClick} className={styles.button}>
           {isPlaying ? "Pause" : "Start"}
         </button>
@@ -256,6 +276,40 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
           onChange={handleDistortionChange}
         />
       </label>
+      <label>
+        <span>Decay</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={0.01}
+          value={decay}
+          onChange={(e) => {
+            const newDecay = Number(e.target.value);
+            setDecay(newDecay);
+            if (reverbRef.current) {
+              reverbRef.current.decay = newDecay;
+            }
+          }}
+        />
+    </label>
+    <label>
+      <span>Wet</span>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.01}
+        value={wet}
+        onChange={(e) => {
+          const newWet = Number(e.target.value);
+          setWet(newWet);
+          if (reverbRef.current) {
+            reverbRef.current.wet.value = newWet;
+          }
+        }}
+      />
+    </label>
       </div>
     </div>
   );
