@@ -21,6 +21,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   const [audioURL, setAudioURL] = React.useState(''); 
 
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [filterType, setFilterType] = React.useState<'lowpass' | 'highpass'>('lowpass');
   const [filterFreq, setFilterFreq] = React.useState(1000);
   const filterRef = React.useRef<Tone.Filter | null>(null);
   const [attack, setAttack] = React.useState(0.01);
@@ -76,6 +77,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFreq = Number(e.target.value);
     setFilterFreq(newFreq);
+    if (filterRef.current) {
+      filterRef.current.frequency.value = newFreq;
+    }
   };
 
   const handleSampleChangeClick = () => {
@@ -101,10 +105,21 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   
     const filter = new Tone.Filter({
       frequency: filterFreq,
-      type: 'lowpass',
+      type: filterType,
       rolloff: -12, 
-      Q: 12, 
+      Q: 5, 
     }).connect(distortionRef.current);
+
+      filterRef.current = filter;
+
+      tracksRef.current = samples.map((sample, i) => ({
+        id: i,
+        sampler: new Tone.Sampler({
+          urls: {
+            [NOTE]: sample.url,
+          },
+        }).connect(filterRef.current),
+      }));
   
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -112,7 +127,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         urls: {
           [NOTE]: sample.url,
         },
-      }).connect(filter), // Connect the sampler to the filter
+      }).connect(filter), 
     }));
 
     
@@ -142,7 +157,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       "16n"
     );
     seqRef.current.start(0);
-  }, [samples, numOfSteps, filterFreq, recorder, distortionValue]);
+  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue]);
 
   
    
@@ -237,6 +252,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
             defaultValue={1}
           />
         </label>
+        <button onClick={() => setFilterType(prevType => prevType === 'lowpass' ? 'highpass' : 'lowpass')}>
+        Switch to {filterType === 'lowpass' ? 'Highpass' : 'Lowpass'}
+      </button>
         <label className={styles.fader}>
           <span>Filter Frequency</span>
           <input
