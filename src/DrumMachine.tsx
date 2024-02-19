@@ -20,7 +20,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   const [recorder] = React.useState(new Tone.Recorder());
   const [audioURL, setAudioURL] = React.useState(''); 
   const [bpm, setBpm] = React.useState(Tone.Transport.bpm.value);
-
+  
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [filterType, setFilterType] = React.useState<'lowpass' | 'highpass'>('lowpass');
   const [filterFreq, setFilterFreq] = React.useState(1000);
@@ -113,15 +113,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     }).connect(distortionRef.current);
 
       filterRef.current = filter;
-
-      tracksRef.current = samples.map((sample, i) => ({
-        id: i,
-        sampler: new Tone.Sampler({
-          urls: {
-            [NOTE]: sample.url,
-          },
-        }).connect(filterRef.current),
-      }));
   
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -132,20 +123,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       }).connect(filter), 
     }));
 
-    
-    
-  
-    tracksRef.current = samples.map((sample, i) => ({
-      id: i,
-      sampler: new Tone.Sampler({
-        urls: {
-          [NOTE]: sample.url,
-        },
-      }).connect(filter),
-    }));
-
-    
-  
     seqRef.current = new Tone.Sequence(
       (time, step) => {
         tracksRef.current.map((trk) => {

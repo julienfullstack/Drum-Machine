@@ -18,7 +18,7 @@ function App() {
         { url: "/C.wav", name: "C" },
       ]}
       samples2={[
-        { url: "/B.wav", name: "B" },
+        { url: "/B.wav", name: "D" },
         { url: "/Asharp.wav", name: "A#" },
         { url: "/A.wav", name: "A" },
         { url: "/Gsharp.wav", name: "G#" },
