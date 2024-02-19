@@ -165,6 +165,16 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         },
       }).connect(phaser),
     }));
+
+    tracksRef.current = samples.map((sample, i) => ({
+      id: i,
+      sampler: new Tone.Sampler({
+        urls: {
+          [NOTE]: sample.url,
+        },
+      }).connect(distortionRef.current),
+    }));
+    
     
   
     seqRef.current = new Tone.Sequence(
@@ -354,7 +364,5 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       </div>
     </div>
   );
-  
-
   
 }
