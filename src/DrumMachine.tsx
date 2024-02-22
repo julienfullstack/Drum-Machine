@@ -139,23 +139,14 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       }).connect(filter), 
     }));
 
-    tracksRef.current = samples.map((sample, i) => ({
-      id: i,
-      sampler: new Tone.Sampler({
-        urls: {
-          [NOTE]: sample.url,
-        },
-      }).connect(reverb), 
-    }));
-
-    tracksRef.current = samples.map((sample, i) => ({
-      id: i,
-      sampler: new Tone.Sampler({
-        urls: {
-          [NOTE]: sample.url,
-        },
-      }).connect(filter),
-    }));
+    // tracksRef.current = samples.map((sample, i) => ({
+    //   id: i,
+    //   sampler: new Tone.Sampler({
+    //     urls: {
+    //       [NOTE]: sample.url,
+    //     },
+    //   }).connect(reverb), 
+    // }));
 
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -166,14 +157,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       }).connect(phaser),
     }));
 
-    tracksRef.current = samples.map((sample, i) => ({
-      id: i,
-      sampler: new Tone.Sampler({
-        urls: {
-          [NOTE]: sample.url,
-        },
-      }).connect(distortionRef.current),
-    }));
     
     
   
@@ -310,7 +293,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
           onChange={handleDistortionChange}
         />
       </label>
-      <label>
+      {/* <label>
         <span>Decay</span>
         <input
           type="range"
@@ -343,7 +326,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
           }
         }}
       />
-    </label>
+    </label> */}
     <label>
       <span>Phaser Frequency</span>
       <input
@@ -364,5 +347,5 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       </div>
     </div>
   );
-  
-}
+      }
+
