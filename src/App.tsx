@@ -1,14 +1,21 @@
 import DrumMachine from "./DrumMachine";
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Resume from './Resume'; 
+import { React } from 'react';
 
+import './App.css';
 
 function App() {
   return (
     <div> 
+    
     <Router>
-      <Link to="/">Home</Link>
-      <Link to="/resume">Resume</Link>
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+      <Link to="/" className="link">Home</Link>
+      <Link to="/resume" className="link">Resume</Link>
+    </div>
+      <br>
+      </br>
       <Routes>
         <Route path="/resume" element={<Resume />} />
         <Route path="/" element={<DrumMachine 
