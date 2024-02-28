@@ -12,6 +12,8 @@ type Track = {
   sampler: Tone.Sampler;
 };
 
+
+
 type Props = {
   samples: { url: string; name: string }[];
   samples2: { url: string; name: string }[];
@@ -92,9 +94,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     }
   };
 
-  const handleSampleChangeClick = () => {
-    setCurrentSampleSet(samples2);
-  };
+  // const handleSampleChangeClick = () => {
+  //   setCurrentSampleSet(samples2);
+  // };
 
   const handleDistortionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newDistortionValue = parseFloat(event.target.value);
