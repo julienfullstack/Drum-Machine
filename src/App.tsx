@@ -1,6 +1,7 @@
 import DrumMachine from "./DrumMachine";
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Resume from './Resume'; 
+import Contact from './Contact';
 import { React } from 'react';
 
 import './App.css';
@@ -13,11 +14,13 @@ function App() {
     <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
       <Link to="/" className="link">Home</Link>
       <Link to="/resume" className="link">Resume</Link>
+      <Link to="/contact" className="link">Contact</Link>
     </div>
       <br>
       </br>
       <Routes>
         <Route path="/resume" element={<Resume />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/" element={<DrumMachine 
         samples={[{ url: "/B.wav", name: "B" },
           { url: "/Asharp.wav", name: "A#" },
