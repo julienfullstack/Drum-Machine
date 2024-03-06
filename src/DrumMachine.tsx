@@ -99,6 +99,19 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
   };
 
   React.useEffect(() => {
+    tracksRef.current.forEach(track => {
+      track.sampler.disconnect();
+      track.sampler.dispose();
+    });
+    
+    if (filterRef.current) {
+      filterRef.current.disconnect();
+      filterRef.current.dispose();
+    }
+    if (distortionRef.current) {
+      distortionRef.current.disconnect();
+      distortionRef.current.dispose();
+    }
     
     distortionRef.current = new Tone.Distortion(distortionValue).toDestination();
 
@@ -110,7 +123,7 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
       frequency: filterFreq,
       type: filterType,
       rolloff: -12, 
-      Q: 5, 
+      Q: 8, 
     }).connect(distortionRef.current);
 
       filterRef.current = filter;
@@ -150,12 +163,15 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
     seqRef.current.start(0);
   }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue]);
 
+
   React.useEffect(() => {
     return () => {
       Tone.Transport.stop();
       setActiveSteps(steps => steps.map(track => track.map(() => false)));
       stepsRef.current = [[]];
+      
     };
+    
   }, []);
 
   return (
