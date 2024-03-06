@@ -76,7 +76,7 @@ $rowGap: 8px;
     @include invisibleInput;
 
     &:checked + #{$lamp}__content {
-      background-color: #1f06ff;
+      background-color: #62f77b;
     }
   }
 
@@ -112,7 +112,7 @@ $rowGap: 8px;
     @include invisibleInput;
 
     &:checked + #{$cell}__content {
-      background-color: #005da5;
+      background-color: #44b4ff;
     }
 
     &:focus-visible + #{$cell}__content {
@@ -148,7 +148,7 @@ $rowGap: 8px;
   border: none;
   cursor: pointer;
   appearance: none;
-  background-color: #005da5;
+  background-color: #2a9eec;
   color: white;
   width: 80px;
   line-height: 2;
@@ -157,7 +157,7 @@ $rowGap: 8px;
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #4281b2;
+    background-color: #44b4ff;
   }
 }
 
