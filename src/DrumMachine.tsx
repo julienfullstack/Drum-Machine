@@ -40,19 +40,21 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
   const stepIds = [...Array(numOfSteps).keys()] as const;
   const [activeSteps, setActiveSteps] = useState(() => 
   Array(samples.length).fill(Array(numOfSteps).fill(false))
-);
+  );
+  const [playingNotes, setPlayingNotes] = React.useState<boolean[]>(Array(samples.length).fill(false));
 
   const handleStartClick = async () => {
     if (Tone.Transport.state === "started") {
       Tone.Transport.pause();
+      seqRef.current?.stop();
       setIsPlaying(false);
     } else {
       await Tone.start();
       Tone.Transport.start();
+      seqRef.current?.start(0);
       setIsPlaying(true);
     }
   };
-
 
   Tone.Destination.connect(recorder);
 
@@ -146,13 +148,18 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
         },
       }).connect(filter),
     }));
-
+  }, [samples, filterFreq, filterType, distortionValue]);
   
     seqRef.current = new Tone.Sequence(
       (time, step) => {
         tracksRef.current.map((trk) => {
-          if (stepsRef.current[trk.id]?.[step]?.checked) {
+          if (stepsRef.current[trk.id]?.[step]?.checked && !playingNotes[trk.id]) {
             trk.sampler.triggerAttack(NOTE, time);
+            setPlayingNotes(prev => {
+              const newPlayingNotes = [...prev];
+              newPlayingNotes[trk.id] = true;
+              return newPlayingNotes;
+            });
           }
           lampsRef.current[step].checked = true;
         });
@@ -160,10 +167,8 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
       [...stepIds],
       "16n"
     );
-    seqRef.current.start(0);
-  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue]);
 
-
+    
   React.useEffect(() => {
     return () => {
       Tone.Transport.stop();
@@ -290,5 +295,4 @@ export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
       </div>
     </div>
   );
-      }
-
+}

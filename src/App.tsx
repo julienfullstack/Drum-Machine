@@ -13,7 +13,7 @@ function App() {
     <div className="navbar">
   <Link to="/" className="link">Home</Link>
   <Link to="/resume" className="link">Resume</Link>
-  <Link to="/contact" className="link">Contact</Link>
+  {/* <Link to="/contact" className="link">Contact</Link> */}
     </div>
       <Routes>
         <Route path="/resume" element={<Resume />} />
