@@ -9,15 +9,12 @@ import './App.css';
 function App() {
   return (
     <div> 
-    
     <Router>
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-      <Link to="/" className="link">Home</Link>
-      <Link to="/resume" className="link">Resume</Link>
-      <Link to="/contact" className="link">Contact</Link>
+    <div className="navbar">
+  <Link to="/" className="link">Home</Link>
+  <Link to="/resume" className="link">Resume</Link>
+  <Link to="/contact" className="link">Contact</Link>
     </div>
-      <br>
-      </br>
       <Routes>
         <Route path="/resume" element={<Resume />} />
         <Route path="/contact" element={<Contact />} />
@@ -33,7 +30,7 @@ function App() {
           { url: "/Dsharp.wav", name: "D#" },
           { url: "/D.wav", name: "D" },
           { url: "/Csharp.wav", name: "C#" },
-          { url: "/C.wav", name: "C" }]} samples2={[]} />} />
+          { url: "/C.wav", name: "C" }]} />} />
       </Routes>
     </Router>
     </div>

@@ -16,26 +16,19 @@ type Track = {
 
 type Props = {
   samples: { url: string; name: string }[];
-  samples2: { url: string; name: string }[];
   numOfSteps?: number;
 };
 
-export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Props) {
+export default function DrumMachine({ samples, numOfSteps = 16 }: Props) {
   const [recorder] = React.useState(new Tone.Recorder());
   const [audioURL, setAudioURL] = React.useState(''); 
   const [bpm, setBpm] = React.useState(Tone.Transport.bpm.value);
-  const [decay, setDecay] = useState(0.5);
-  const [wet, setWet] = useState(0.5);
-  const reverbRef = useRef<Tone.Reverb | null>(null);
   
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [filterType, setFilterType] = React.useState<'lowpass' | 'highpass'>('lowpass');
   const [filterFreq, setFilterFreq] = React.useState(1000);
   const filterRef = React.useRef<Tone.Filter | null>(null);
-  const [attack, setAttack] = React.useState(0.01);
   const [distortionValue, setDistortionValue] = React.useState(0.8);
-  const [phaserFreq, setPhaserFreq] = useState(0.5);
-  const phaserRef = useRef<Tone.Phaser | null>(null);
 
 
   const tracksRef = React.useRef<Track[]>([]);
@@ -45,7 +38,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   const distortionRef = React.useRef<Tone.Distortion | null>(null);
   const trackIds = [...Array(samples.length).keys()] as const;
   const stepIds = [...Array(numOfSteps).keys()] as const;
-
+  const [activeSteps, setActiveSteps] = useState(() => 
+  Array(samples.length).fill(Array(numOfSteps).fill(false))
+);
 
   const handleStartClick = async () => {
     if (Tone.Transport.state === "started") {
@@ -57,6 +52,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       setIsPlaying(true);
     }
   };
+
 
   Tone.Destination.connect(recorder);
 
@@ -78,7 +74,7 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
   
   const handleBpmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newBpm = Number(e.target.value);
-    setBpm(newBpm); // Update the bpm state variable
+    setBpm(newBpm); 
     Tone.Transport.bpm.value = newBpm;
   };
 
@@ -94,10 +90,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     }
   };
 
-  // const handleSampleChangeClick = () => {
-  //   setCurrentSampleSet(samples2);
-  // };
-
   const handleDistortionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newDistortionValue = parseFloat(event.target.value);
     setDistortionValue(newDistortionValue);
@@ -106,11 +98,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     }
   };
 
-  
   React.useEffect(() => {
+    
     distortionRef.current = new Tone.Distortion(distortionValue).toDestination();
-    const reverb = new Tone.Reverb({ decay, wet}).toDestination();
-    reverbRef.current = reverb;
 
     if (filterRef.current) {
       filterRef.current.disconnect();
@@ -124,13 +114,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
     }).connect(distortionRef.current);
 
       filterRef.current = filter;
-
-      const phaser = new Tone.Phaser({
-        frequency: phaserFreq,
-        octaves: 5,
-        baseFrequency: 1000
-      }).toDestination();
-      phaserRef.current = phaser;
   
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -138,17 +121,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         urls: {
           [NOTE]: sample.url,
         },
-      }).connect(filter), 
-    }));
+      }).connect(filter),  
 
-    // tracksRef.current = samples.map((sample, i) => ({
-    //   id: i,
-    //   sampler: new Tone.Sampler({
-    //     urls: {
-    //       [NOTE]: sample.url,
-    //     },
-    //   }).connect(reverb), 
-    // }));
+    }));
 
     tracksRef.current = samples.map((sample, i) => ({
       id: i,
@@ -156,11 +131,9 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         urls: {
           [NOTE]: sample.url,
         },
-      }).connect(phaser),
+      }).connect(filter),
     }));
 
-    
-    
   
     seqRef.current = new Tone.Sequence(
       (time, step) => {
@@ -175,10 +148,16 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
       "16n"
     );
     seqRef.current.start(0);
-  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue, decay, wet, phaserFreq]);
+  }, [samples, numOfSteps, filterFreq, filterType, recorder, distortionValue]);
 
-  
-   
+  React.useEffect(() => {
+    return () => {
+      Tone.Transport.stop();
+      setActiveSteps(steps => steps.map(track => track.map(() => false)));
+      stepsRef.current = [[]];
+    };
+  }, []);
+
   return (
     <div className={styles.machine}>
       <div className={styles.labelList}>
@@ -234,9 +213,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
         </div>
       </div>
       <div className={styles.controls}>
-        {/* <button onClick={handleSampleChangeClick} className={styles.button}>
-        Change Samples
-      </button> */}
         <button onClick={handleStartClick} className={styles.button}>
           {isPlaying ? "Pause" : "Start"}
         </button>
@@ -295,57 +271,6 @@ export default function DrumMachine({ samples, samples2, numOfSteps = 16 }: Prop
           onChange={handleDistortionChange}
         />
       </label>
-      {/* <label>
-        <span>Decay</span>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          step={0.01}
-          value={decay}
-          onChange={(e) => {
-            const newDecay = Number(e.target.value);
-            setDecay(newDecay);
-            if (reverbRef.current) {
-              reverbRef.current.decay = newDecay;
-            }
-          }}
-        />
-    </label>
-    <label>
-      <span>Wet</span>
-      <input
-        type="range"
-        min={0}
-        max={1}
-        step={0.01}
-        value={wet}
-        onChange={(e) => {
-          const newWet = Number(e.target.value);
-          setWet(newWet);
-          if (reverbRef.current) {
-            reverbRef.current.wet.value = newWet;
-          }
-        }}
-      />
-    </label> */}
-    <label>
-      <span>Phaser Frequency</span>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={0.01}
-        value={phaserFreq}
-        onChange={(e) => {
-          const newPhaserFreq = Number(e.target.value);
-          setPhaserFreq(newPhaserFreq);
-          if (phaserRef.current) {
-            phaserRef.current.frequency.value = newPhaserFreq;
-          }
-        }}
-      />
-    </label>
       </div>
     </div>
   );
