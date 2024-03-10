@@ -34,7 +34,7 @@ function Resume() {
         {  }
       </div>
       {} */}
-      <a href="./Resume.pdf" download="Resume.pdf">Download Resume</a>
+      <a href="src/Resume.pdf" download="Resume.pdf">Download Resume</a>
     </div>
   );
 }
