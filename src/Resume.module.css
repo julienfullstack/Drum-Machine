@@ -29,4 +29,10 @@
   font-size: 25px;
 }
 
+.resume-header p {
+  font-size: 20px;
+}
 
+.resume-section ul {
+  list-style-position: inside;
+}
